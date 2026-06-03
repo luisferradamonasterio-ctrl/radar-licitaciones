@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Innova Net — Radar de Licitaciones</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#06080f; --surf:#0d1221; --surf2:#131929; --bdr:#1e2d4a;
+  --acc:#00d4ff; --acc2:#7c3aed; --acc3:#10b981;
+  --warn:#f59e0b; --err:#ef4444; --txt:#e2e8f0; --mut:#64748b;
+  --mono:'Space Mono',monospace; --sans:'DM Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 700px 350px at 0% 10%,rgba(0,212,255,.05) 0%,transparent 65%),
+             radial-gradient(ellipse 600px 500px at 100% 90%,rgba(124,58,237,.06) 0%,transparent 65%)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.02) 1px,transparent 1px);
+  background-size:28px 28px}
+.w{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 18px}
+
+/* HEADER */
+header{border-bottom:1px solid var(--bdr);padding:14px 0;
+  backdrop-filter:blur(14px);background:rgba(6,8,15,.88);
+  position:sticky;top:0;z-index:100}
+header .w{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-i{width:30px;height:30px;border-radius:6px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  display:flex;align-items:center;justify-content:center;font-size:15px}
+.logo-t{font-family:var(--mono);font-size:11px;line-height:1.3}
+.logo-t span{display:block;color:var(--acc);font-size:8px;letter-spacing:2px;text-transform:uppercase}
+.dot-live{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--mut);font-family:var(--mono)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--acc3);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* HERO */
+.hero{padding:36px 0 24px;text-align:center}
+.htag{display:inline-block;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.18);
+  color:var(--acc);font-family:var(--mono);font-size:9px;letter-spacing:3px;
+  text-transform:uppercase;padding:4px 12px;border-radius:100px;margin-bottom:14px}
+h1{font-size:clamp(24px,3.5vw,40px);font-weight:700;line-height:1.1;letter-spacing:-1px;margin-bottom:9px}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--acc),var(--acc2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hsub{color:var(--mut);font-size:13px;max-width:440px;margin:0 auto;line-height:1.6}
+
+/* PANEL CONTROL */
+.panel{background:var(--surf);border:1px solid var(--bdr);border-radius:11px;padding:18px;margin:20px 0}
+.plabel{font-family:var(--mono);font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+.prow{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-bottom:14px}
+
+/* Chips */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:4px;padding:4px 11px;border-radius:100px;
+  font-size:10px;font-family:var(--mono);cursor:pointer;transition:all .15s;border:1px solid;user-select:none}
+.dot5{width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0}
+.chip.c-cl{background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.3);color:var(--acc)}
+.chip.c-ia{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.3);color:#a78bfa}
+.chip.c-cb{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3);color:var(--acc3)}
+.chip.c-off{background:transparent;border-color:var(--bdr);color:var(--mut);opacity:.4}
+
+/* Select + botones */
+.sel{background:var(--surf2);border:1px solid var(--bdr);color:var(--txt);
+  font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:6px;cursor:pointer}
+.sel:focus{outline:none;border-color:var(--acc)}
+.brow{display:flex;gap:8px;flex-wrap:wrap}
+.bp{background:linear-gradient(135deg,var(--acc),#008fb3);color:#000;border:none;
+  padding:10px 22px;border-radius:7px;font-family:var(--mono);font-size:11px;font-weight:700;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.bp:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,212,255,.25)}
+.bp:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.bs{background:transparent;color:var(--mut);border:1px solid var(--bdr);
+  padding:10px 16px;border-radius:7px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .15s}
+.bs:hover{border-color:var(--acc);color:var(--acc)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:9px;margin-bottom:18px}
+.scard{background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:12px;text-align:center}
+.snum{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--acc);line-height:1;margin-bottom:2px}
+.snum.g{color:var(--acc3)}.snum.y{color:var(--warn)}
+.slbl{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:1px}
+
+/* PROGRESS */
+.prog{background:var(--surf);border:1px solid var(--bdr);border-radius:8px;
+  padding:12px 16px;margin-bottom:14px;display:none}
+.ptop{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--mut);margin-bottom:7px}
+.ptrack{background:var(--surf2);border-radius:100px;height:3px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:100px;transition:width .25s}
+
+/* STATES */
+.sbox{text-align:center;padding:56px 20px;display:none}
+.spin{width:40px;height:40px;border:2px solid var(--bdr);border-top-color:var(--acc);
+  border-radius:50%;animation:rot .7s linear infinite;margin:0 auto 12px}
+@keyframes rot{to{transform:rotate(360deg)}}
+.stitle{font-size:15px;font-weight:600;margin-bottom:5px}
+.ssub{font-size:12px;color:var(--mut)}
+.eicon{font-size:40px;margin-bottom:12px}
+
+/* ERROR BANNER */
+.ebanner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);
+  color:#fca5a5;padding:10px 14px;border-radius:7px;font-size:11px;
+  font-family:var(--mono);margin-bottom:14px;display:none}
+
+/* CARDS */
+.grid{display:grid;gap:12px;margin-bottom:36px}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:11px;
+  overflow:hidden;transition:border-color .15s,transform .15s;animation:fup .3s ease both}
+@keyframes fup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card:hover{border-color:rgba(0,212,255,.22);transform:translateY(-1px)}
+
+.ctop{display:flex;align-items:flex-start;gap:10px;padding:16px 16px 0}
+.cmain{flex:1;min-width:0}
+.corg{font-size:9px;font-family:var(--mono);color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cname{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:8px}
+.cname a{color:inherit;text-decoration:none;transition:color .12s}
+.cname a:hover{color:var(--acc)}
+.ctags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:9px}
+.tag{font-size:8px;font-family:var(--mono);padding:2px 6px;border-radius:3px;
+  text-transform:uppercase;letter-spacing:.5px;border:1px solid}
+.t-cl{background:rgba(0,212,255,.07);color:var(--acc);border-color:rgba(0,212,255,.18)}
+.t-ia{background:rgba(124,58,237,.07);color:#a78bfa;border-color:rgba(124,58,237,.18)}
+.t-cb{background:rgba(16,185,129,.07);color:var(--acc3);border-color:rgba(16,185,129,.18)}
+.t-st{background:rgba(245,158,11,.07);color:var(--warn);border-color:rgba(245,158,11,.18)}
+.cmeta{display:flex;flex-wrap:wrap;gap:12px;font-size:10px;color:var(--mut);font-family:var(--mono)}
+
+/* Score ring */
+.sring-wrap{flex-shrink:0;text-align:center}
+.sring{width:48px;height:48px;border-radius:50%;border:2px solid;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 3px;font-family:var(--mono);font-weight:700;font-size:13px}
+.sring.h{border-color:var(--acc3);background:rgba(16,185,129,.07);color:var(--acc3)}
+.sring.m{border-color:var(--warn);background:rgba(245,158,11,.07);color:var(--warn)}
+.sring.l{border-color:var(--err);background:rgba(239,68,68,.07);color:var(--err)}
+.sring.p{border-color:var(--bdr);background:transparent;color:var(--mut);font-size:16px}
+.srlbl{font-size:7px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
+
+/* EVAL */
+.evwrap{margin:10px 16px 0}
+.bevl{display:inline-flex;align-items:center;gap:5px;
+  background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.16);
+  color:var(--acc);font-family:var(--mono);font-size:9px;
+  padding:5px 11px;border-radius:5px;cursor:pointer;transition:all .15s}
+.bevl:hover{background:rgba(0,212,255,.13)}
+.evpanel{margin-top:9px;background:var(--surf2);border:1px solid var(--bdr);
+  border-radius:7px;padding:12px;display:none}
+.evload{display:flex;align-items:center;gap:7px;font-size:10px;font-family:var(--mono);color:var(--mut)}
+.mspin{width:12px;height:12px;border:1.5px solid var(--bdr);border-top-color:var(--acc);
+  border-radius:50%;animation:rot .6s linear infinite;flex-shrink:0}
+.evsecs{display:grid;gap:9px}
+.evlbl{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:var(--mut);margin-bottom:2px}
+.evval{font-size:11px;color:var(--txt);line-height:1.6}
+.evact{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 9px;border-radius:4px;margin-top:1px}
+.evact.postular{color:var(--acc3);background:rgba(16,185,129,.1)}
+.evact.investigar{color:var(--warn);background:rgba(245,158,11,.1)}
+.evact.descartar{color:var(--err);background:rgba(239,68,68,.1)}
+.evchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.evchip{font-size:9px;padding:2px 7px;border-radius:100px;border:1px solid var(--bdr);color:var(--mut);font-family:var(--mono)}
+
+.cfoot{padding:9px 16px 13px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:6px;border-top:1px solid var(--bdr);margin-top:10px}
+.lmp{font-size:10px;color:var(--acc);text-decoration:none;font-family:var(--mono)}
+.lmp:hover{opacity:.7}
+
+footer{border-top:1px solid var(--bdr);padding:16px 0;text-align:center;
+  color:var(--mut);font-size:10px;font-family:var(--mono);margin-top:16px}
+footer a{color:var(--acc);text-decoration:none}
+
+@media(max-width:560px){
+  .ctop{flex-direction:column}
+  .sring-wrap{align-self:flex-end;margin-top:-50px}
+  .prow{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="w">
+    <div class="logo">
+      <div class="logo-i">⚡</div>
+      <div class="logo-t">Innova Net <span>Radar de Licitaciones</span></div>
+    </div>
+    <div class="dot-live"><div class="dot"></div><span id="hst">Listo</span></div>
+  </div>
+</header>
+
+<main>
+<div class="w">
+
+  <div class="hero">
+    <div class="htag">🔎 Mercado Público · Chile</div>
+    <h1>Monitor de <em>Oportunidades</em> Tech</h1>
+    <p class="hsub">Detecta licitaciones con IA, Cloud y Chatbots. Evaluación automática con Claude AI.</p>
+  </div>
+
+  <div class="panel">
+    <div class="prow">
+      <div>
+        <div class="plabel">Categorías</div>
+        <div class="chips" id="chips">
+          <div class="chip c-cl" data-kw="cloud"><div class="dot5"></div>☁️ Cloud/SaaS</div>
+          <div class="chip c-ia" data-kw="ia">   <div class="dot5"></div>🤖 IA / ML</div>
+          <div class="chip c-cb" data-kw="chatbot"><div class="dot5"></div>💬 Chatbot</div>
+        </div>
+      </div>
+      <div>
+        <div class="plabel">Rango</div>
+        <select class="sel" id="dsel">
+          <option value="1">Hoy</option>
+          <option value="3" selected>3 días</option>
+          <option value="7">7 días</option>
+          <option value="14">14 días</option>
+        </select>
+      </div>
+    </div>
+    <div class="brow">
+      <button class="bp" id="btnB" onclick="buscar()">⚡ Buscar Licitaciones</button>
+      <button class="bs" onclick="limpiar()">✕ Limpiar</button>
+    </div>
+  </div>
+
+  <div class="stats" id="statsBar" style="display:none">
+    <div class="scard"><div class="snum" id="sT">0</div><div class="slbl">Encontradas</div></div>
+    <div class="scard"><div class="snum g" id="sA">—</div><div class="slbl">Alta oport.</div></div>
+    <div class="scard"><div class="snum y" id="sM">—</div><div class="slbl">Media oport.</div></div>
+    <div class="scard"><div class="snum" id="sP">—</div><div class="slbl">Sin evaluar</div></div>
+  </div>
+
+  <div class="prog" id="progW">
+    <div class="ptop"><span id="progL">Iniciando...</span><span id="progP">0%</span></div>
+    <div class="ptrack"><div class="pfill" id="progF" style="width:0%"></div></div>
+  </div>
+
+  <div class="ebanner" id="errB"></div>
+
+  <div class="sbox" id="loadB">
+    <div class="spin"></div>
+    <div class="stitle" id="loadT">Consultando Mercado Público...</div>
+    <div class="ssub">Un momento por favor</div>
+  </div>
+
+  <div class="sbox" id="emptyB">
+    <div class="eicon">📭</div>
+    <div class="stitle">Sin resultados</div>
+    <div class="ssub">No hay licitaciones con esas categorías en el período.<br>Prueba ampliando el rango de días.</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+</main>
+
+<footer>
+  <div class="w">
+    Innova Net · <a href="https://api.mercadopublico.cl" target="_blank">API Mercado Público</a> · Evaluación: Claude AI · <span id="fDate"></span>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+const TICKET = '9AD92373-2AF1-4F72-B9D4-CA8E087E27F2';
+
+const KW = {
+  cloud:   ['cloud','nube','aws','azure','gcp','google cloud','microsoft 365','office 365',
+            'saas','iaas','paas','hosting','datacenter','data center','virtualización',
+            'hiperconvergencia','infraestructura como servicio','plataforma como servicio',
+            'computación en la nube','servicios en nube'],
+  ia:      ['inteligencia artificial',' ia ','machine learning','aprendizaje automático',
+            'deep learning','nlp','procesamiento de lenguaje','visión artificial',
+            'reconocimiento óptico','modelo predictivo','análisis predictivo',
+            'minería de datos','red neuronal','algoritmo predictivo','ia generativa',
+            'modelo de lenguaje','automatización inteligente'],
+  chatbot: ['chatbot','chat bot','asistente virtual','bot conversacional',
+            'agente conversacional','agente virtual','automatización conversacional',
+            'respuesta automática','atención automatizada','bot de atención'],
+};
+
+let activeKW  = new Set(['cloud','ia','chatbot']);
+let results   = [];
+let evalCache = {};
+
+// ══════════════════════════════════════════
+// CHIPS
+// ══════════════════════════════════════════
+document.getElementById('chips').addEventListener('click', e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  const kw = c.dataset.kw;
+  activeKW.has(kw) ? activeKW.delete(kw) : activeKW.add(kw);
+  renderChips();
+});
+function renderChips() {
+  const map = { cloud:'c-cl', ia:'c-ia', chatbot:'c-cb' };
+  document.querySelectorAll('.chip').forEach(c => {
+    c.className = 'chip ' + (activeKW.has(c.dataset.kw) ? map[c.dataset.kw] : 'c-off');
+  });
+}
+
+// ══════════════════════════════════════════
+// FECHA HELPERS
+// ══════════════════════════════════════════
+function toFecha(d) {
+  return String(d.getDate()).padStart(2,'0')
+       + String(d.getMonth()+1).padStart(2,'0')
+       + d.getFullYear();
+}
+function fechaOffset(n) {
+  const d = new Date(); d.setDate(d.getDate()-n); return toFecha(d);
+}
+
+// ══════════════════════════════════════════
+// API MERCADO PÚBLICO — JSONP
+// ══════════════════════════════════════════
+function fetchDia(fecha) {
+  return new Promise(resolve => {
+    const id  = 'cb' + fecha + Date.now();
+    const el  = document.createElement('script');
+    const tid = setTimeout(() => { cleanup(); resolve([]); }, 16000);
+    function cleanup() {
+      clearTimeout(tid); delete window[id];
+      try { document.head.removeChild(el); } catch(_) {}
+    }
+    window[id] = data => { cleanup(); resolve(data?.Listado || []); };
+    el.onerror  = () => { cleanup(); resolve([]); };
+    el.src = `https://api.mercadopublico.cl/servicios/v1/publico/licitaciones.jsonp`
+           + `?fecha=${fecha}&estado=activas&ticket=${TICKET}&callback=${id}`;
+    document.head.appendChild(el);
+  });
+}
+
+// ══════════════════════════════════════════
+// FILTRO LOCAL
+// ══════════════════════════════════════════
+function match(lic) {
+  const txt = (`${lic.Nombre||''} ${lic.Descripcion||''} ${lic.Rubro||''}`).toLowerCase();
+  return [...activeKW].some(kw => KW[kw].some(t => txt.includes(t)));
+}
+function getTags(lic) {
+  const txt = (`${lic.Nombre||''} ${lic.Descripcion||''}`).toLowerCase();
+  const r = [];
+  if (activeKW.has('cloud')   && KW.cloud.some(t=>txt.includes(t)))   r.push({k:'cl',l:'☁️ Cloud'});
+  if (activeKW.has('ia')      && KW.ia.some(t=>txt.includes(t)))      r.push({k:'ia',l:'🤖 IA'});
+  if (activeKW.has('chatbot') && KW.chatbot.some(t=>txt.includes(t))) r.push({k:'cb',l:'💬 Chatbot'});
+  return r;
+}
+
+// ══════════════════════════════════════════
+// BUSCAR
+// ══════════════════════════════════════════
+async function buscar() {
+  if (!activeKW.size) { showErr('Selecciona al menos una categoría.'); return; }
+  clrErr(); resetUI();
+
+  const dias   = +document.getElementById('dsel').value;
+  const fechas = Array.from({length:dias}, (_,i) => fechaOffset(i));
+
+  setBusy(true);
+  show('progW'); show('loadB');
+
+  const seen = new Set();
+  const all  = [];
+
+  for (let i = 0; i < fechas.length; i++) {
+    const f = fechas[i];
+    setProg(i, fechas.length, `Consultando ${f.slice(0,2)}/${f.slice(2,4)}/${f.slice(4)}...`);
+    const lics = await fetchDia(f);
+    lics.forEach(l => { if (!seen.has(l.CodigoExterno)) { seen.add(l.CodigoExterno); all.push(l); } });
+  }
+
+  setProg(fechas.length, fechas.length, 'Filtrando...');
+  results = all.filter(match);
+
+  hide('progW'); hide('loadB');
+  setBusy(false);
+  render();
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function render() {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+  if (!results.length) { show('emptyB'); hide('statsBar'); return; }
+  hide('emptyB');
+  document.getElementById('statsBar').style.display = 'grid';
+  updStats();
+  document.getElementById('hst').textContent = `${results.length} licitaciones · ${new Date().toLocaleTimeString('es-CL')}`;
+  results.forEach((l,i) => g.appendChild(buildCard(l,i)));
+}
+
+function buildCard(lic, idx) {
+  const code   = lic.CodigoExterno || '—';
+  const nombre = lic.Nombre        || 'Sin nombre';
+  const org    = lic.NombreOrganismo || lic.Organismo || '—';
+  const estado = lic.Estado        || '—';
+  const monto  = lic.MontoEstimado ? '$'+Number(lic.MontoEstimado).toLocaleString('es-CL') : 'Sin monto';
+  const cierre = lic.FechaCierre   ? new Date(lic.FechaCierre).toLocaleDateString('es-CL') : '—';
+  const url    = `https://www.mercadopublico.cl/Procurement/Modules/RFB/DetailsAcquisition.aspx?idlicitacion=${code}`;
+  const tgs    = getTags(lic);
+
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.style.animationDelay = Math.min(idx*.035,.35)+'s';
+
+  const tagsHtml = tgs.map(t=>`<span class="tag t-${t.k}">${t.l}</span>`).join('')
+                 + `<span class="tag t-st">${estado}</span>`;
+
+  div.innerHTML = `
+    <div class="ctop">
+      <div class="cmain">
+        <div class="corg" title="${org}">${org}</div>
+        <div class="cname"><a href="${url}" target="_blank">${nombre}</a></div>
+        <div class="ctags">${tagsHtml}</div>
+        <div class="cmeta">
+          <span>🏷️ ${code}</span>
+          <span>📅 ${cierre}</span>
+          <span>💰 ${monto}</span>
+        </div>
+      </div>
+      <div class="sring-wrap">
+        <div class="sring p" id="sr-${code}">?</div>
+        <div class="srlbl">Fit Score</div>
+      </div>
+    </div>
+    <div class="evwrap">
+      <button class="bevl" id="be-${code}" onclick="evaluar('${code}')">✨ Evaluar con IA</button>
+      <div class="evpanel" id="ep-${code}">
+        <div class="evload" id="el-${code}"><div class="mspin"></div>Analizando con Claude AI...</div>
+        <div class="evsecs" id="es-${code}" style="display:none"></div>
+      </div>
+    </div>
+    <div class="cfoot">
+      <a class="lmp" href="${url}" target="_blank">Ver en Mercado Público →</a>
+      <span style="font-size:9px;color:var(--mut);font-family:var(--mono)">${code}</span>
+    </div>`;
+  return div;
+}
+
+// ══════════════════════════════════════════
+// EVALUACIÓN — proxy interno Claude
+// ══════════════════════════════════════════
+async function evaluar(code) {
+  if (evalCache[code]) { renderEval(code, evalCache[code]); return; }
+
+  hide('be-'+code);
+  document.getElementById(`ep-${code}`).style.display = 'block';
+  show('el-'+code);
+  document.getElementById(`es-${code}`).style.display = 'none';
+
+  const lic = results.find(l => l.CodigoExterno === code);
+  if (!lic) return;
+
+  const prompt = `Eres experto en licitaciones públicas chilenas y ventas B2G de tecnología. Analiza esta licitación para Innova Net: empresa chilena con portafolio de ciberseguridad (Imperva, Sophos, Radware, CyberArk), networking (Cisco, HPE), cloud (AWS, Azure, GCP) e IA/Chatbots empresariales (marca IA-360).
+
+LICITACIÓN:
+- Nombre: ${lic.Nombre||'Sin nombre'}
+- Organismo: ${lic.NombreOrganismo||lic.Organismo||'N/A'}
+- Monto estimado: ${lic.MontoEstimado ? '$'+Number(lic.MontoEstimado).toLocaleString('es-CL')+' CLP' : 'No especificado'}
+- Estado: ${lic.Estado||'—'}
+- Fecha cierre: ${lic.FechaCierre ? new Date(lic.FechaCierre).toLocaleDateString('es-CL') : '—'}
+- Código: ${code}
+
+Responde ÚNICAMENTE en JSON válido, sin texto extra, sin markdown, sin comillas adicionales:
+{"score":75,"nivel":"Alta","resumen":"qué necesita el organismo en 1-2 oraciones","fit":"por qué Innova Net tiene ventaja aquí","riesgos":"principales obstáculos o requisitos difíciles","accion":"Postular","kw":["keyword1","keyword2"]}
+
+Reglas: score 0-100 (Alta>70, Media 40-70, Baja<40). accion debe ser exactamente: Postular, Investigar, o Descartar.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const data = await res.json();
+    const raw  = (data.content?.[0]?.text || '').replace(/```json|```/g,'').trim();
+    let ev;
+    try { ev = JSON.parse(raw); }
+    catch {
+      ev = { score:50, nivel:'Media', resumen: raw.slice(0,160)||'Sin análisis.',
+             fit:'Revisar manualmente.', riesgos:'Datos insuficientes.', accion:'Investigar', kw:[] };
+    }
+    evalCache[code] = ev;
+    renderEval(code, ev);
+    updRing(code, ev.score);
+    updStats();
+
+  } catch(e) {
+    document.getElementById(`el-${code}`).innerHTML =
+      '<span style="color:var(--err);font-size:10px">⚠️ Error al evaluar. Intenta de nuevo.</span>';
+    show('be-'+code);
+    console.error('Eval error:', e);
+  }
+}
+
+function renderEval(code, ev) {
+  document.getElementById(`el-${code}`).style.display = 'none';
+  const sec = document.getElementById(`es-${code}`);
+  const aC  = (ev.accion||'investigar').toLowerCase();
+  const kws = (ev.kw||[]).map(k=>`<span class="evchip">${k}</span>`).join('');
+  sec.innerHTML = `
+    <div><div class="evlbl">📋 Resumen</div><div class="evval">${ev.resumen||'—'}</div></div>
+    <div><div class="evlbl">✅ Fit Innova Net</div><div class="evval">${ev.fit||'—'}</div></div>
+    <div><div class="evlbl">⚠️ Riesgos</div><div class="evval">${ev.riesgos||'—'}</div></div>
+    <div><div class="evlbl">🎯 Acción</div><span class="evact ${aC}">${ev.accion||'—'}</span></div>
+    ${kws ? `<div><div class="evlbl">🔑 Keywords</div><div class="evchips">${kws}</div></div>` : ''}`;
+  sec.style.display = 'grid';
+}
+
+function updRing(code, score) {
+  const r = document.getElementById(`sr-${code}`);
+  if (!r) return;
+  r.textContent = score;
+  r.className = 'sring ' + (score>=70?'h':score>=40?'m':'l');
+}
+
+// ══════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════
+function updStats() {
+  const evs = Object.values(evalCache);
+  document.getElementById('sT').textContent = results.length;
+  document.getElementById('sA').textContent = evs.filter(e=>e.score>=70).length || '—';
+  document.getElementById('sM').textContent = evs.filter(e=>e.score>=40&&e.score<70).length || '—';
+  document.getElementById('sP').textContent = results.length - evs.length;
+}
+
+// ══════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════
+function setProg(done, total, label) {
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('progF').style.width = pct+'%';
+  document.getElementById('progP').textContent = pct+'%';
+  document.getElementById('progL').textContent = label;
+  document.getElementById('loadT').textContent = label;
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function show(id) { const el=document.getElementById(id); if(el) el.style.display=''; }
+function hide(id) { const el=document.getElementById(id); if(el) el.style.display='none'; }
+function setBusy(on) {
+  const b = document.getElementById('btnB');
+  b.disabled = on;
+  b.textContent = on ? '⏳ Buscando...' : '⚡ Buscar Licitaciones';
+}
+function showErr(msg) {
+  const b = document.getElementById('errB');
+  b.textContent = '⚠️ ' + msg; b.style.display = 'block';
+}
+function clrErr() { document.getElementById('errB').style.display = 'none'; }
+function resetUI() {
+  document.getElementById('grid').innerHTML = '';
+  hide('emptyB');
+  document.getElementById('statsBar').style.display = 'none';
+  results = []; evalCache = {};
+}
+function limpiar() {
+  resetUI(); clrErr();
+  document.getElementById('hst').textContent = 'Listo';
+}
+
+document.getElementById('fDate').textContent =
+  new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'});
+</script>
+</body>
+</html>
