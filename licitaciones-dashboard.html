@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Innova Net — Radar de Licitaciones IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#06080f; --surface:#0d1221; --surface2:#131929; --border:#1e2d4a;
+    --accent:#00d4ff; --accent2:#7c3aed; --accent3:#10b981;
+    --warn:#f59e0b; --danger:#ef4444; --text:#e2e8f0; --muted:#64748b;
+    --mono:'Space Mono',monospace; --sans:'DM Sans',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse 700px 400px at 5% 15%,rgba(0,212,255,.04) 0%,transparent 70%),
+               radial-gradient(ellipse 500px 500px at 95% 85%,rgba(124,58,237,.05) 0%,transparent 70%)}
+  body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:radial-gradient(circle,rgba(255,255,255,.025) 1px,transparent 1px);background-size:30px 30px}
+  .wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 20px}
+
+  header{border-bottom:1px solid var(--border);padding:16px 0;backdrop-filter:blur(12px);
+    background:rgba(6,8,15,.85);position:sticky;top:0;z-index:100}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo-icon{width:32px;height:32px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-size:16px}
+  .logo-text{font-family:var(--mono);font-size:12px;line-height:1.3}
+  .logo-text span{display:block;color:var(--accent);font-size:9px;letter-spacing:2px;text-transform:uppercase}
+  .live-dot{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-family:var(--mono)}
+  .pulse{width:7px;height:7px;background:var(--accent3);border-radius:50%;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+
+  .hero{padding:40px 0 28px;text-align:center}
+  .hero-tag{display:inline-block;margin-bottom:16px;background:rgba(0,212,255,.08);
+    border:1px solid rgba(0,212,255,.2);color:var(--accent);font-family:var(--mono);
+    font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:5px 13px;border-radius:100px}
+  h1{font-size:clamp(26px,4vw,44px);font-weight:700;line-height:1.1;letter-spacing:-1px;margin-bottom:10px}
+  h1 em{font-style:normal;background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero-sub{color:var(--muted);font-size:14px;max-width:480px;margin:0 auto 28px;line-height:1.6}
+
+  .controls{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px}
+  .ctrl-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+  .ctrl-row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;
+    font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .18s;border:1px solid;user-select:none}
+  .chip-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+  .chip.on-cloud{background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.35);color:var(--accent)}
+  .chip.on-ia{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.35);color:#a78bfa}
+  .chip.on-chat{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.35);color:var(--accent3)}
+  .chip.off{background:transparent;border-color:var(--border);color:var(--muted);opacity:.45}
+  .days-select{background:var(--surface2);border:1px solid var(--border);color:var(--text);
+    font-family:var(--mono);font-size:12px;padding:7px 12px;border-radius:7px;cursor:pointer}
+  .days-select:focus{outline:none;border-color:var(--accent)}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#008fb3);color:#000;border:none;
+    padding:11px 24px;border-radius:8px;font-family:var(--mono);font-size:12px;font-weight:700;
+    cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:7px}
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,212,255,.28)}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .btn-sec{background:transparent;color:var(--muted);border:1px solid var(--border);
+    padding:11px 18px;border-radius:8px;font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .18s}
+  .btn-sec:hover{border-color:var(--accent);color:var(--accent)}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:14px;text-align:center}
+  .stat-n{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--accent);line-height:1;margin-bottom:3px}
+  .stat-n.g{color:var(--accent3)} .stat-n.y{color:var(--warn)}
+  .stat-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+  .prog-wrap{background:var(--surface);border:1px solid var(--border);border-radius:9px;
+    padding:14px 18px;margin-bottom:16px;display:none}
+  .prog-top{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px}
+  .prog-track{background:var(--surface2);border-radius:100px;height:4px;overflow:hidden}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;transition:width .3s}
+
+  .state-box{text-align:center;padding:60px 20px;display:none}
+  .spinner{width:44px;height:44px;border:2px solid var(--border);border-top-color:var(--accent);
+    border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 14px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .state-title{font-size:16px;font-weight:600;margin-bottom:6px}
+  .state-sub{font-size:13px;color:var(--muted)}
+  .empty-icon{font-size:44px;margin-bottom:14px}
+
+  .err-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);
+    color:#fca5a5;padding:12px 16px;border-radius:8px;font-size:12px;
+    font-family:var(--mono);margin-bottom:16px;display:none}
+
+  .grid{display:grid;gap:14px;margin-bottom:40px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    overflow:hidden;transition:border-color .18s,transform .18s;animation:fadeUp .35s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .card:hover{border-color:rgba(0,212,255,.25);transform:translateY(-2px)}
+
+  .card-top{display:flex;align-items:flex-start;gap:12px;padding:18px 18px 0}
+  .card-main{flex:1;min-width:0}
+  .card-org{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+  .card-name{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:9px}
+  .card-name a{color:inherit;text-decoration:none;transition:color .15s}
+  .card-name a:hover{color:var(--accent)}
+  .card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px}
+  .tag{font-size:9px;font-family:var(--mono);padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.5px;border:1px solid}
+  .tag-cloud{background:rgba(0,212,255,.08);color:var(--accent);border-color:rgba(0,212,255,.2)}
+  .tag-ia{background:rgba(124,58,237,.08);color:#a78bfa;border-color:rgba(124,58,237,.2)}
+  .tag-chat{background:rgba(16,185,129,.08);color:var(--accent3);border-color:rgba(16,185,129,.2)}
+  .tag-est{background:rgba(245,158,11,.08);color:var(--warn);border-color:rgba(245,158,11,.2)}
+  .card-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--muted);font-family:var(--mono)}
+
+  .score-badge{flex-shrink:0;text-align:center}
+  .score-ring{width:52px;height:52px;border-radius:50%;border:2px solid;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    margin:0 auto 3px;font-family:var(--mono)}
+  .score-ring.high{border-color:var(--accent3);background:rgba(16,185,129,.07)}
+  .score-ring.mid{border-color:var(--warn);background:rgba(245,158,11,.07)}
+  .score-ring.low{border-color:var(--danger);background:rgba(239,68,68,.07)}
+  .score-ring.pend{border-color:var(--border);background:transparent}
+  .score-n{font-size:14px;font-weight:700;line-height:1}
+  .score-ring.high .score-n{color:var(--accent3)}
+  .score-ring.mid .score-n{color:var(--warn)}
+  .score-ring.low .score-n{color:var(--danger)}
+  .score-ring.pend .score-n{color:var(--muted);font-size:18px}
+  .score-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
+
+  .eval-wrap{margin:12px 18px 0}
+  .btn-eval{display:inline-flex;align-items:center;gap:6px;
+    background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.18);
+    color:var(--accent);font-family:var(--mono);font-size:10px;
+    padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .18s}
+  .btn-eval:hover{background:rgba(0,212,255,.14)}
+  .eval-panel{margin-top:10px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:8px;padding:14px;display:none}
+  .eval-loading{display:flex;align-items:center;gap:8px;font-size:11px;font-family:var(--mono);color:var(--muted)}
+  .mini-spin{width:13px;height:13px;border:1.5px solid var(--border);border-top-color:var(--accent);
+    border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+  .eval-secs{display:grid;gap:10px}
+  .ev-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:3px}
+  .ev-val{font-size:12px;color:var(--text);line-height:1.6}
+  .ev-action{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 10px;border-radius:5px;margin-top:2px}
+  .ev-action.postular{color:var(--accent3);background:rgba(16,185,129,.1)}
+  .ev-action.investigar{color:var(--warn);background:rgba(245,158,11,.1)}
+  .ev-action.descartar{color:var(--danger);background:rgba(239,68,68,.1)}
+  .ev-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+  .ev-chip{font-size:10px;padding:2px 8px;border-radius:100px;border:1px solid var(--border);color:var(--muted);font-family:var(--mono)}
+
+  .card-footer{padding:10px 18px 14px;display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:8px;border-top:1px solid var(--border);margin-top:12px}
+  .link-mp{font-size:11px;color:var(--accent);text-decoration:none;font-family:var(--mono)}
+  .link-mp:hover{opacity:.7}
+
+  footer{border-top:1px solid var(--border);padding:20px 0;text-align:center;
+    color:var(--muted);font-size:11px;font-family:var(--mono);margin-top:20px}
+  footer a{color:var(--accent);text-decoration:none}
+
+  @media(max-width:580px){
+    .card-top{flex-direction:column}
+    .score-badge{align-self:flex-end;margin-top:-52px}
+    .ctrl-row{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">Innova Net <span>Radar de Licitaciones</span></div>
+    </div>
+    <div class="live-dot"><div class="pulse"></div><span id="hdrStatus">Listo</span></div>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-tag">🔎 Mercado Público · Chile</div>
+    <h1>Monitor de <em>Oportunidades</em> Tech</h1>
+    <p class="hero-sub">Detecta licitaciones con IA, Cloud y Chatbots. Evaluación automática de fit para Innova Net.</p>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-row">
+      <div>
+        <div class="ctrl-label">Categorías a detectar</div>
+        <div class="chips" id="chips">
+          <div class="chip on-cloud" data-kw="cloud"><div class="chip-dot"></div>☁️ Cloud / SaaS</div>
+          <div class="chip on-ia"   data-kw="ia">   <div class="chip-dot"></div>🤖 IA / ML</div>
+          <div class="chip on-chat" data-kw="chatbot"><div class="chip-dot"></div>💬 Chatbot</div>
+        </div>
+      </div>
+      <div>
+        <div class="ctrl-label">Rango de búsqueda</div>
+        <select class="days-select" id="diasSel">
+          <option value="1">Hoy</option>
+          <option value="3" selected>Últimos 3 días</option>
+          <option value="7">Últimos 7 días</option>
+          <option value="14">Últimos 14 días</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" id="btnB" onclick="buscar()">⚡ Buscar Licitaciones</button>
+      <button class="btn-sec" onclick="limpiar()">✕ Limpiar</button>
+    </div>
+  </div>
+
+  <div class="stats" id="statsBar" style="display:none">
+    <div class="stat"><div class="stat-n" id="sT">0</div><div class="stat-l">Encontradas</div></div>
+    <div class="stat"><div class="stat-n g" id="sA">—</div><div class="stat-l">Alta oportunidad</div></div>
+    <div class="stat"><div class="stat-n y" id="sM">—</div><div class="stat-l">Media oportunidad</div></div>
+    <div class="stat"><div class="stat-n" id="sP">—</div><div class="stat-l">Sin evaluar</div></div>
+  </div>
+
+  <div class="prog-wrap" id="progW">
+    <div class="prog-top"><span id="progL">Iniciando...</span><span id="progP">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progF" style="width:0%"></div></div>
+  </div>
+
+  <div class="err-box" id="errB"></div>
+
+  <div class="state-box" id="loadB">
+    <div class="spinner"></div>
+    <div class="state-title" id="loadT">Consultando Mercado Público...</div>
+    <div class="state-sub" id="loadS">Un momento por favor</div>
+  </div>
+
+  <div class="state-box" id="emptyB">
+    <div class="empty-icon">📭</div>
+    <div class="state-title">Sin resultados</div>
+    <div class="state-sub">No hay licitaciones con las categorías seleccionadas en el período elegido.<br>Prueba ampliando el rango de días.</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    Innova Net · <a href="https://api.mercadopublico.cl" target="_blank">API Mercado Público</a> · Evaluación: Claude AI · <span id="fDate"></span>
+  </div>
+</footer>
+
+<script>
+const TICKET = '9AD92373-2AF1-4F72-B9D4-CA8E087E27F2';
+
+const KW = {
+  cloud:   ['cloud','nube',' aws ','azure','gcp','google cloud','microsoft 365','office 365',
+            'saas','iaas','paas','hosting','datacenter','data center','virtualización',
+            'hiperconvergencia','infraestructura como servicio','plataforma como servicio'],
+  ia:      ['inteligencia artificial',' ia ','machine learning','aprendizaje automático',
+            'deep learning','nlp','procesamiento de lenguaje','visión artificial',
+            'reconocimiento óptico','modelo predictivo','análisis predictivo',
+            'minería de datos','algoritmo de clasificación','red neuronal'],
+  chatbot: ['chatbot','chat bot','asistente virtual','bot conversacional',
+            'agente conversacional','agente virtual','automatización conversacional',
+            'respuesta automática','atención automatizada'],
+};
+
+let activeKW = new Set(['cloud','ia','chatbot']);
+let results  = [];
+let evalCache = {};
+
+/* ── CHIPS ── */
+document.getElementById('chips').addEventListener('click', e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  const kw = c.dataset.kw;
+  activeKW.has(kw) ? activeKW.delete(kw) : activeKW.add(kw);
+  renderChips();
+});
+function renderChips() {
+  const map = {cloud:'on-cloud',ia:'on-ia',chatbot:'on-chat'};
+  document.querySelectorAll('.chip').forEach(c => {
+    const kw = c.dataset.kw;
+    c.className = 'chip ' + (activeKW.has(kw) ? map[kw] : 'off');
+  });
+}
+
+/* ── FECHA ── */
+function toFecha(d) {
+  return String(d.getDate()).padStart(2,'0') +
+         String(d.getMonth()+1).padStart(2,'0') +
+         d.getFullYear();
+}
+function fechaOffset(n) {
+  const d = new Date(); d.setDate(d.getDate()-n); return toFecha(d);
+}
+
+/* ── API via JSONP (evita CORS) ── */
+function fetchDia(fecha) {
+  return new Promise(resolve => {
+    const cb = 'cb_' + fecha + '_' + Math.random().toString(36).slice(2);
+    const el = document.createElement('script');
+    const tid = setTimeout(() => { cleanup(); resolve([]); }, 15000);
+    function cleanup() {
+      clearTimeout(tid); delete window[cb];
+      try { document.head.removeChild(el); } catch(e) {}
+    }
+    window[cb] = data => { cleanup(); resolve(data?.Listado || []); };
+    el.onerror = () => { cleanup(); resolve([]); };
+    el.src = `https://api.mercadopublico.cl/servicios/v1/publico/licitaciones.jsonp` +
+             `?fecha=${fecha}&estado=activas&ticket=${TICKET}&callback=${cb}`;
+    document.head.appendChild(el);
+  });
+}
+
+/* ── FILTRO ── */
+function match(lic) {
+  const txt = (`${lic.Nombre||''} ${lic.Descripcion||''} ${lic.Rubro||''}`).toLowerCase();
+  return [...activeKW].some(kw => KW[kw].some(t => txt.includes(t)));
+}
+function tags(lic) {
+  const txt = (`${lic.Nombre||''} ${lic.Descripcion||''}`).toLowerCase();
+  const r = [];
+  if (activeKW.has('cloud')   && KW.cloud.some(t=>txt.includes(t)))   r.push({k:'cloud',l:'☁️ Cloud'});
+  if (activeKW.has('ia')      && KW.ia.some(t=>txt.includes(t)))      r.push({k:'ia',   l:'🤖 IA'});
+  if (activeKW.has('chatbot') && KW.chatbot.some(t=>txt.includes(t))) r.push({k:'chat', l:'💬 Chatbot'});
+  return r;
+}
+
+/* ── BUSCAR ── */
+async function buscar() {
+  if (!activeKW.size) { err('Selecciona al menos una categoría.'); return; }
+  clrErr(); limpiarRes();
+
+  const dias = +document.getElementById('diasSel').value;
+  const fechas = Array.from({length:dias},(_,i)=>fechaOffset(i));
+
+  setBusy(true);
+  document.getElementById('progW').style.display  = 'block';
+  document.getElementById('loadB').style.display  = 'block';
+  document.getElementById('statsBar').style.display = 'none';
+  document.getElementById('emptyB').style.display = 'none';
+
+  const seen = new Set(); const all = [];
+  for (let i=0; i<fechas.length; i++) {
+    const f = fechas[i];
+    prog(i, fechas.length, `Consultando ${f.slice(0,2)}/${f.slice(2,4)}/${f.slice(4)}...`);
+    const lics = await fetchDia(f);
+    lics.forEach(l => { if(!seen.has(l.CodigoExterno)){seen.add(l.CodigoExterno);all.push(l);} });
+  }
+  prog(fechas.length, fechas.length, 'Filtrando resultados...');
+  results = all.filter(match);
+
+  document.getElementById('progW').style.display = 'none';
+  document.getElementById('loadB').style.display = 'none';
+  setBusy(false);
+  render();
+}
+
+/* ── RENDER ── */
+function render() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  if (!results.length) {
+    document.getElementById('emptyB').style.display  = 'block';
+    document.getElementById('statsBar').style.display = 'none';
+    return;
+  }
+  document.getElementById('statsBar').style.display = 'grid';
+  updStats();
+  document.getElementById('hdrStatus').textContent = `${results.length} licitaciones · ${new Date().toLocaleTimeString('es-CL')}`;
+  results.forEach((l,i) => { const c = card(l,i); grid.appendChild(c); });
+}
+
+function card(lic, idx) {
+  const code   = lic.CodigoExterno || '—';
+  const nombre = lic.Nombre        || 'Sin nombre';
+  const org    = lic.NombreOrganismo || lic.Organismo || '—';
+  const estado = lic.Estado        || '—';
+  const monto  = lic.MontoEstimado ? '$'+Number(lic.MontoEstimado).toLocaleString('es-CL') : 'Sin monto';
+  const cierre = lic.FechaCierre   ? new Date(lic.FechaCierre).toLocaleDateString('es-CL') : '—';
+  const url    = `https://www.mercadopublico.cl/Procurement/Modules/RFB/DetailsAcquisition.aspx?idlicitacion=${code}`;
+  const tgs    = tags(lic);
+
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.style.animationDelay = Math.min(idx*.04,.4)+'s';
+
+  const tagsHtml = tgs.map(t=>`<span class="tag tag-${t.k}">${t.l}</span>`).join('') +
+                   `<span class="tag tag-est">${estado}</span>`;
+
+  div.innerHTML = `
+    <div class="card-top">
+      <div class="card-main">
+        <div class="card-org">${org}</div>
+        <div class="card-name"><a href="${url}" target="_blank">${nombre}</a></div>
+        <div class="card-tags">${tagsHtml}</div>
+        <div class="card-meta">
+          <span>🏷️ ${code}</span>
+          <span>📅 Cierre: ${cierre}</span>
+          <span>💰 ${monto}</span>
+        </div>
+      </div>
+      <div class="score-badge">
+        <div class="score-ring pend" id="ring-${code}">
+          <div class="score-n" id="sn-${code}">?</div>
+        </div>
+        <div class="score-lbl">Fit Score</div>
+      </div>
+    </div>
+    <div class="eval-wrap">
+      <button class="btn-eval" id="be-${code}" onclick="evaluar('${code}')">✨ Evaluar con IA</button>
+      <div class="eval-panel" id="ep-${code}">
+        <div class="eval-loading" id="el-${code}"><div class="mini-spin"></div>Analizando con Claude AI...</div>
+        <div class="eval-secs"  id="es-${code}" style="display:none"></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a class="link-mp" href="${url}" target="_blank">Ver en Mercado Público →</a>
+      <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">${code}</span>
+    </div>`;
+  return div;
+}
+
+/* ── EVAL IA ── */
+async function evaluar(code) {
+  if (evalCache[code]) { showEval(code, evalCache[code]); return; }
+  document.getElementById(`be-${code}`).style.display = 'none';
+  document.getElementById(`ep-${code}`).style.display = 'block';
+  document.getElementById(`el-${code}`).style.display = 'flex';
+  document.getElementById(`es-${code}`).style.display = 'none';
+
+  const lic = results.find(l=>l.CodigoExterno===code); if(!lic) return;
+
+  const prompt = `Eres experto en licitaciones públicas chilenas y ventas B2G de tecnología. Analiza esta licitación para Innova Net (empresa chilena: ciberseguridad con Imperva/Sophos/Radware, networking con Cisco/HPE, cloud, IA y chatbots empresariales).
+
+LICITACIÓN:
+- Nombre: ${lic.Nombre||'Sin nombre'}
+- Organismo: ${lic.NombreOrganismo||lic.Organismo||'N/A'}
+- Monto: ${lic.MontoEstimado ? '$'+Number(lic.MontoEstimado).toLocaleString('es-CL')+' CLP' : 'No especificado'}
+- Estado: ${lic.Estado||'—'}
+- Cierre: ${lic.FechaCierre ? new Date(lic.FechaCierre).toLocaleDateString('es-CL') : '—'}
+
+Responde SOLO en JSON sin markdown:
+{"score":75,"nivel":"Alta","resumen":"qué busca el organismo","fit":"ventaja de Innova Net","riesgos":"obstáculos clave","accion":"Postular","kw":["keyword1"]}
+score 0-100. nivel: Alta>70, Media 40-70, Baja<40. accion: Postular/Investigar/Descartar.`;
+
+  try {
+    const res  = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:prompt}]})
+    });
+    const data = await res.json();
+    const raw  = data.content?.[0]?.text || '';
+    let ev;
+    try { ev = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch { ev = {score:50,nivel:'Media',resumen:raw.slice(0,180)||'Sin análisis.',fit:'Revisar.',riesgos:'Datos insuficientes.',accion:'Investigar',kw:[]}; }
+    evalCache[code] = ev;
+    showEval(code,ev);
+    updRing(code,ev.score);
+    updStats();
+  } catch(e) {
+    document.getElementById(`el-${code}`).innerHTML = '<span style="color:var(--danger);font-size:11px">⚠️ Error de conexión. Intenta de nuevo.</span>';
+    document.getElementById(`be-${code}`).style.display = 'inline-flex';
+  }
+}
+
+function showEval(code, ev) {
+  document.getElementById(`el-${code}`).style.display = 'none';
+  const sec = document.getElementById(`es-${code}`);
+  const aC = {'postular':'postular','investigar':'investigar','descartar':'descartar'}[(ev.accion||'').toLowerCase()] || 'investigar';
+  const kw = (ev.kw||[]).map(k=>`<span class="ev-chip">${k}</span>`).join('');
+  sec.innerHTML = `
+    <div><div class="ev-lbl">📋 Resumen</div><div class="ev-val">${ev.resumen||'—'}</div></div>
+    <div><div class="ev-lbl">✅ Fit Innova Net</div><div class="ev-val">${ev.fit||'—'}</div></div>
+    <div><div class="ev-lbl">⚠️ Riesgos</div><div class="ev-val">${ev.riesgos||'—'}</div></div>
+    <div><div class="ev-lbl">🎯 Acción recomendada</div><span class="ev-action ${aC}">${ev.accion||'—'}</span></div>
+    ${kw?`<div><div class="ev-lbl">🔑 Keywords</div><div class="ev-chips">${kw}</div></div>`:''}`;
+  sec.style.display = 'grid';
+}
+
+function updRing(code, score) {
+  const ring = document.getElementById(`ring-${code}`);
+  const sn   = document.getElementById(`sn-${code}`);
+  if(!ring||!sn) return;
+  sn.textContent = score;
+  ring.classList.remove('pend');
+  ring.classList.add(score>=70?'high':score>=40?'mid':'low');
+}
+
+/* ── STATS ── */
+function updStats() {
+  const evs  = Object.values(evalCache);
+  document.getElementById('sT').textContent = results.length;
+  document.getElementById('sA').textContent = evs.filter(e=>e.score>=70).length || '—';
+  document.getElementById('sM').textContent = evs.filter(e=>e.score>=40&&e.score<70).length || '—';
+  document.getElementById('sP').textContent = results.length - evs.length;
+}
+
+/* ── PROG ── */
+function prog(done, total, label) {
+  const pct = total>0?Math.round(done/total*100):0;
+  document.getElementById('progF').style.width = pct+'%';
+  document.getElementById('progP').textContent = pct+'%';
+  document.getElementById('progL').textContent = label;
+  document.getElementById('loadT').textContent = label;
+}
+
+/* ── UTILS ── */
+function setBusy(on) {
+  const b = document.getElementById('btnB');
+  b.disabled = on;
+  b.textContent = on ? '⏳ Buscando...' : '⚡ Buscar Licitaciones';
+}
+function err(msg)  { const b=document.getElementById('errB'); b.textContent='⚠️ '+msg; b.style.display='block'; }
+function clrErr()  { document.getElementById('errB').style.display='none'; }
+function limpiarRes() { document.getElementById('grid').innerHTML=''; results=[]; evalCache={}; }
+function limpiar() {
+  limpiarRes();
+  document.getElementById('statsBar').style.display = 'none';
+  document.getElementById('emptyB').style.display   = 'none';
+  document.getElementById('hdrStatus').textContent  = 'Listo';
+  clrErr();
+}
+
+document.getElementById('fDate').textContent = new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'});
+</script>
+</body>
+</html>
