@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, height=1080" />
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 1920px; height: 1080px; overflow: hidden; font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body>
+  <div
+    data-composition-id="stat-problema"
+    data-duration="4"
+    data-width="1920"
+    data-height="1080"
+    style="width:1920px;height:1080px;display:flex;align-items:center;justify-content:center;
+           background:linear-gradient(160deg,#0D1B2A 0%,#0A0A0F 100%);"
+  >
+    <div style="display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center;">
+      <div id="number" style="
+        font-size:180px;font-weight:800;line-height:1;
+        background:linear-gradient(135deg,#00E5FF,#1565C0);
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+        opacity:0;
+      ">68%</div>
+      <div id="label" style="font-size:34px;font-weight:400;color:#F0F4F8;max-width:900px;line-height:1.45;opacity:0;">
+        de las consultas repetitivas pueden automatizarse<br>sin perder calidad de atención
+      </div>
+      <div id="source" style="font-size:17px;color:#8899AA;opacity:0;">
+        Fuente: Gartner Customer Service Report 2025
+      </div>
+    </div>
+  </div>
+  <script>
+    gsap.to("#number", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.2 });
+    gsap.from("#number", { y: 60, duration: 0.8, ease: "power3.out", delay: 0.2 });
+    gsap.to("#label",  { opacity: 1, y: 0, duration: 0.7, ease: "power2.out", delay: 0.7 });
+    gsap.from("#label", { y: 30, duration: 0.7, ease: "power2.out", delay: 0.7 });
+    gsap.to("#source", { opacity: 1, duration: 0.6, delay: 1.2 });
+  </script>
+</body>
+</html>

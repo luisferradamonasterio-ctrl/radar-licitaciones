@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, height=1080" />
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 1920px; height: 1080px; overflow: hidden; font-family: 'Inter', sans-serif; }
+    .feature { display: none; width: 1920px; height: 1080px; align-items: center; justify-content: center; }
+    .card {
+      display: flex; align-items: center; gap: 64px;
+      padding: 64px 120px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(0,229,255,0.18);
+      border-radius: 36px;
+      max-width: 1500px; width: 100%;
+    }
+    .icon { font-size: 100px; flex-shrink: 0; }
+    .num  { font-size: 15px; color: #00E5FF; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 16px; }
+    .ftitle { font-size: 60px; font-weight: 700; line-height: 1.1; color: #F0F4F8; margin-bottom: 16px; }
+    .fdesc  { font-size: 28px; color: #8899AA; line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <div
+    data-composition-id="features"
+    data-duration="14"
+    data-width="1920"
+    data-height="1080"
+    style="width:1920px;height:1080px;position:relative;background:linear-gradient(160deg,#0D1B2A,#0A0A0F);"
+  >
+    <div id="f1" class="feature" style="display:flex;position:absolute;inset:0;">
+      <div class="card" style="opacity:0;" id="c1">
+        <div class="icon">🧠</div>
+        <div><div class="num">01 / 04</div><div class="ftitle">Entrenado con sus datos</div><div class="fdesc">No con internet genérico — con su base de conocimiento real</div></div>
+      </div>
+    </div>
+    <div id="f2" class="feature" style="position:absolute;inset:0;">
+      <div class="card" style="opacity:0;" id="c2">
+        <div class="icon">🔗</div>
+        <div><div class="num">02 / 04</div><div class="ftitle">Integración nativa</div><div class="fdesc">ERP, CRM, Mercado Público, WhatsApp, intranet corporativa</div></div>
+      </div>
+    </div>
+    <div id="f3" class="feature" style="position:absolute;inset:0;">
+      <div class="card" style="opacity:0;" id="c3">
+        <div class="icon">🛡️</div>
+        <div><div class="num">03 / 04</div><div class="ftitle">Seguridad empresarial</div><div class="fdesc">Datos alojados en Chile · Cumplimiento normativo local</div></div>
+      </div>
+    </div>
+    <div id="f4" class="feature" style="position:absolute;inset:0;">
+      <div class="card" style="opacity:0;" id="c4">
+        <div class="icon">📊</div>
+        <div><div class="num">04 / 04</div><div class="ftitle">Panel de métricas en tiempo real</div><div class="fdesc">Conversaciones, satisfacción, temas frecuentes y alertas</div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const features = [
+      { el: "#f1", card: "#c1", start: 0 },
+      { el: "#f2", card: "#c2", start: 3.5 },
+      { el: "#f3", card: "#c3", start: 7 },
+      { el: "#f4", card: "#c4", start: 10.5 },
+    ];
+
+    features.forEach(({ el, card, start }) => {
+      gsap.set(el, { display: "none" });
+      gsap.set(card, { opacity: 0, x: -50 });
+
+      gsap.to(el, { display: "flex", duration: 0, delay: start });
+      gsap.to(card, { opacity: 1, x: 0, duration: 0.7, ease: "power2.out", delay: start + 0.1 });
+
+      const next = start + 3.2;
+      if (next < 14) {
+        gsap.to(card, { opacity: 0, x: 50, duration: 0.3, ease: "power2.in", delay: next });
+        gsap.to(el, { display: "none", duration: 0, delay: next + 0.3 });
+      }
+    });
+  </script>
+</body>
+</html>

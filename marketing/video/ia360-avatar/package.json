@@ -1,0 +1,10 @@
+{
+  "name": "ia360-video",
+  "type": "module",
+  "scripts": {
+    "render": "node video.mjs"
+  },
+  "dependencies": {
+    "hyperframes": "latest"
+  }
+}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, height=1080" />
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 1920px; height: 1080px; overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: #0A0A0F;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+  </style>
+</head>
+<body>
+  <div
+    id="root"
+    data-composition-id="intro-logo"
+    data-duration="3"
+    data-width="1920"
+    data-height="1080"
+    style="width:1920px;height:1080px;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center, #0D1B2A 0%, #0A0A0F 70%);"
+  >
+    <div id="logo-wrap" style="display:flex;flex-direction:column;align-items:center;gap:20px;opacity:0;">
+      <div style="
+        width:130px;height:130px;border-radius:28px;
+        background:linear-gradient(135deg,#1565C0,#00B4D8);
+        display:flex;align-items:center;justify-content:center;
+        font-size:60px;font-weight:800;color:#fff;letter-spacing:-2px;
+      ">IA</div>
+      <div style="
+        font-size:72px;font-weight:800;letter-spacing:6px;
+        background:linear-gradient(90deg,#00E5FF,#F0F4F8);
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      ">IA-360</div>
+      <div style="font-size:20px;color:#8899AA;letter-spacing:4px;text-transform:uppercase;">
+        Inteligencia Artificial Empresarial
+      </div>
+      <div style="
+        margin-top:8px;height:2px;width:200px;
+        background:linear-gradient(90deg,transparent,#00E5FF,transparent);
+        opacity:0;" id="line">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    gsap.to("#logo-wrap", { opacity: 1, scale: 1, duration: 1.2, ease: "power2.out", delay: 0.3 });
+    gsap.from("#logo-wrap", { scale: 0.88, duration: 1.2, ease: "power2.out", delay: 0.3 });
+    gsap.to("#line", { opacity: 1, width: 300, duration: 1, ease: "power2.out", delay: 1.2 });
+  </script>
+</body>
+</html>
